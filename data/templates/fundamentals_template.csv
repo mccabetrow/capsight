@@ -1,0 +1,6 @@
+market,as_of_date,vacancy_rate_pct,avg_asking_rent_psf_yr_nnn,yoy_rent_growth_pct,new_supply_sf_ytd,under_construction_sf,net_absorption_sf_ytd,cap_rate_stabilized_median_pct,source_name,source_url,source_date,notes
+dfw,2025-06-01,7.8,9.85,5.2,12000000,28000000,3500000,6.0,"JLL Q2 2025 Industrial Insights – DFW","https://...pdf",2025-07-12,"p.2 table: vacancy/rents; p.4 pipeline"
+ie,2025-06-01,6.2,8.50,4.1,8000000,15000000,2000000,5.5,"C&W Q2 2025 MarketBeat – IE","https://...pdf",2025-07-10,"p.3: vacancy/rents; p.5 pipeline"
+atl,2025-06-01,8.1,7.90,3.8,9000000,17000000,2500000,6.3,"CBRE Q2 2025 Atlanta Industrial","https://...pdf",2025-07-15,"p.2: vacancy/rents; p.4 pipeline"
+phx,2025-06-01,10.5,8.10,2.9,7000000,12000000,1800000,5.8,"Colliers Q2 2025 Phoenix Industrial","https://...pdf",2025-07-11,"p.2: vacancy/rents; p.3 pipeline"
+sav,2025-06-01,5.9,6.75,4.5,4000000,6000000,1200000,5.2,"JLL Q2 2025 Savannah Industrial","https://...pdf",2025-07-13,"p.2: vacancy/rents; p.4 pipeline"

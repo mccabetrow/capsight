@@ -1,0 +1,65 @@
+groups:
+  - name: capsight_backtest_alerts
+    rules:
+      - alert: BacktestHighFailureRate
+        expr: (rate(backtest_runs_total[1h]) - rate(backtest_runs_successful_total[1h])) / rate(backtest_runs_total[1h]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High backtest failure rate detected"
+          description: "Backtest failure rate is {{ $value | humanizePercentage }} over the last hour"
+
+      - alert: BacktestSLABreach
+        expr: increase(backtest_sla_breaches_total[1h]) > 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backtest SLA breach detected"
+          description: "{{ $value }} SLA breaches detected in the last hour"
+
+      - alert: BacktestModelAccuracyDrop
+        expr: avg(backtest_model_accuracy) < 0.7
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Model accuracy below threshold"
+          description: "Average model accuracy is {{ $value | humanizePercentage }}, below the 70% threshold"
+
+      - alert: BacktestFeatureDriftHigh
+        expr: avg(backtest_feature_drift_score) > 0.25
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High feature drift detected"
+          description: "Feature drift score is {{ $value }}, indicating potential model degradation"
+
+      - alert: BacktestLongRuntime
+        expr: avg(backtest_runtime_seconds) > 3600
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Backtest runtime exceeds threshold"
+          description: "Average backtest runtime is {{ $value | humanizeDuration }}, exceeding 1 hour"
+
+      - alert: BacktestJobsStuck
+        expr: sum(backtest_scheduled_jobs{status="running"}) > 10
+        for: 30m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Too many backtest jobs running"
+          description: "{{ $value }} backtest jobs have been running for more than 30 minutes"
+
+      - alert: BacktestNoRecentRuns
+        expr: increase(backtest_runs_total[4h]) == 0
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No backtest runs in the last 4 hours"
+          description: "No backtest activity detected, check if scheduling is working properly"

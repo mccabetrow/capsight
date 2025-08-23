@@ -1,0 +1,21 @@
+{
+  "name": "capsight-sales-materials",
+  "version": "1.0.0",
+  "description": "CapSight sales materials and PDF generation",
+  "scripts": {
+    "generate-pdf": "md-to-pdf sales-deck.md --pdf-options \"{\\\"format\\\": \\\"A4\\\", \\\"margin\\\": \\\"20mm\\\", \\\"printBackground\\\": true}\"",
+    "generate-simple": "md-to-pdf sales-deck.md",
+    "generate-all": "npm run generate-simple && echo 'Sales materials generated successfully!'",
+    "preview": "md-to-pdf sales-deck.md --launch-browser",
+    "clean": "rm -f *.pdf || del *.pdf"
+  },
+  "devDependencies": {
+    "md-to-pdf": "^5.2.4"
+  },
+  "keywords": [
+    "sales",
+    "marketing",
+    "pdf-generation",
+    "capsight"
+  ]
+}

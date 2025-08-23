@@ -1,0 +1,422 @@
+openapi: 3.0.3
+info:
+  title: CapSight Valuation API
+  description: Industrial CRE valuation with robust estimators and conformal prediction
+  version: 1.0.0
+  contact:
+    name: CapSight Engineering
+    email: eng@capsight.com
+  license:
+    name: Proprietary
+    
+servers:
+  - url: https://app.capsight.com/api
+    description: Production server
+  - url: https://staging.capsight.com/api
+    description: Staging server
+  - url: http://localhost:3000/api
+    description: Development server
+
+paths:
+  /value:
+    post:
+      summary: Get property valuation
+      description: |
+        Returns valuation using weighted median robust v1.0 methodology.
+        
+        **Methodology**: 
+        - Weighted median of comparable sales with similarity kernels
+        - Recency weighting (12-month half-life)
+        - Distance decay (15-mile exponential)
+        - Size similarity (log-normal kernel, σ=0.35)
+        - Dynamic confidence bands via conformal prediction
+        - Automatic fallback rules for edge cases
+        
+        **Data Quality**:
+        - Only verified sales within 5 years
+        - Outliers removed (top/bottom 5% by cap rate per market)
+        - Geofence validation for market boundaries
+        
+        **SLA Targets**:
+        - MAPE ≤ 10%
+        - RMSE ≤ 50 basis points  
+        - Coverage: 78-82% (80% confidence intervals)
+        
+      operationId: getValue
+      tags:
+        - Valuation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [market_slug, noi_annual, building_sf]
+              properties:
+                market_slug:
+                  type: string
+                  enum: [dfw, ie, atl, phx, sav]
+                  description: Market identifier
+                  example: dfw
+                noi_annual:
+                  type: number
+                  minimum: 10000
+                  maximum: 50000000
+                  description: Annual Net Operating Income in USD
+                  example: 1200000
+                building_sf:
+                  type: number  
+                  minimum: 5000
+                  maximum: 2000000
+                  description: Building square footage
+                  example: 200000
+                submarket:
+                  type: string
+                  description: Optional submarket for similarity bonus
+                  example: "North Dallas"
+                lat:
+                  type: number
+                  minimum: -90
+                  maximum: 90
+                  description: Optional latitude for distance weighting
+                  example: 32.7767
+                lng:
+                  type: number
+                  minimum: -180
+                  maximum: 180
+                  description: Optional longitude for distance weighting
+                  example: -96.7970
+            examples:
+              typical_warehouse:
+                summary: Typical warehouse valuation
+                value:
+                  market_slug: dfw
+                  noi_annual: 1200000
+                  building_sf: 200000
+                  submarket: "North Dallas"
+              large_distribution:
+                summary: Large distribution center
+                value:
+                  market_slug: ie
+                  noi_annual: 3500000
+                  building_sf: 650000
+                  lat: 34.0522
+                  lng: -117.2437
+                  
+      responses:
+        "200":
+          description: Successful valuation
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [valuation_usd, confidence_interval, cap_rate_pct, methodology, comp_count]
+                properties:
+                  valuation_usd:
+                    type: number
+                    description: Property valuation in USD
+                    example: 19354839
+                  confidence_interval:
+                    type: array
+                    items:
+                      type: number
+                    minItems: 2
+                    maxItems: 2
+                    description: [Lower bound, Upper bound] in USD
+                    example: [18387097, 20322581]
+                  cap_rate_pct:
+                    type: number
+                    description: Capitalization rate as percentage
+                    example: 6.2
+                  price_per_sf_usd:
+                    type: number
+                    description: Price per square foot in USD
+                    example: 96.77
+                  methodology:
+                    type: string
+                    description: Valuation method version
+                    example: "weighted_median_robust_v1.0"
+                  comp_count:
+                    type: integer
+                    description: Number of comparables used
+                    example: 23
+                  top_comps:
+                    type: array
+                    description: Top 5 weighted comparables (for auditability)
+                    maxItems: 5
+                    items:
+                      type: object
+                      properties:
+                        address_masked:
+                          type: string
+                          description: Privacy-masked address
+                          example: "1234 ****** Blvd"
+                        sale_date:
+                          type: string
+                          format: date
+                          example: "2024-03-15"
+                        adjusted_cap_rate:
+                          type: number
+                          description: Time-adjusted cap rate
+                          example: 6.45
+                        weight:
+                          type: number
+                          description: Similarity weight (0-1)
+                          example: 0.23
+                        distance_mi:
+                          type: number
+                          description: Distance in miles
+                          example: 8.2
+                  confidence_band:
+                    type: object
+                    properties:
+                      width_pct:
+                        type: number
+                        description: Half-width as decimal (e.g., 0.05 = ±5%)
+                        example: 0.05
+                      label:
+                        type: string
+                        description: Human-readable band description
+                        example: "±5% (SLA met)"
+                      status:
+                        type: string
+                        enum: [ok, warn, bad]
+                        description: Band quality indicator
+                        example: "ok"
+                  quality_indicators:
+                    type: object
+                    properties:
+                      sample_size:
+                        type: integer
+                        description: Number of comparables
+                        example: 23
+                      data_freshness_months:
+                        type: number
+                        description: Average age of comps in months
+                        example: 8.3
+                      dispersion_bps:
+                        type: number
+                        description: IQR dispersion in basis points
+                        example: 35
+                      fallback_reason:
+                        type: string
+                        description: Reason for fallback adjustments
+                        example: "Low sample size"
+              examples:
+                successful_valuation:
+                  summary: Successful valuation with tight bands
+                  value:
+                    valuation_usd: 19354839
+                    confidence_interval: [18387097, 20322581]
+                    cap_rate_pct: 6.2
+                    price_per_sf_usd: 96.77
+                    methodology: "weighted_median_robust_v1.0"
+                    comp_count: 23
+                    top_comps:
+                      - address_masked: "1234 ****** Blvd"
+                        sale_date: "2024-03-15"
+                        adjusted_cap_rate: 6.45
+                        weight: 0.23
+                        distance_mi: 8.2
+                      - address_masked: "5678 ****** Dr"
+                        sale_date: "2024-01-22"
+                        adjusted_cap_rate: 6.1
+                        weight: 0.19
+                        distance_mi: 12.1
+                    confidence_band:
+                      width_pct: 0.05
+                      label: "±5% (SLA met)"
+                      status: "ok"
+                    quality_indicators:
+                      sample_size: 23
+                      data_freshness_months: 8.3
+                      dispersion_bps: 35
+                wide_band_example:
+                  summary: Valuation with wide bands due to data quality
+                  value:
+                    valuation_usd: 15800000
+                    confidence_interval: [13272000, 18328000]
+                    cap_rate_pct: 6.8
+                    price_per_sf_usd: 79.00
+                    methodology: "weighted_median_robust_v1.0"
+                    comp_count: 7
+                    confidence_band:
+                      width_pct: 0.16
+                      label: "±16% (low data / high dispersion)"
+                      status: "bad"
+                    quality_indicators:
+                      sample_size: 7
+                      data_freshness_months: 14.2
+                      dispersion_bps: 85
+                      fallback_reason: "Low sample size"
+                      
+        "400":
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Missing required fields: market_slug, noi_annual, building_sf"
+                    
+        "404":
+          description: No comparable sales found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No comparable sales found for this market"
+                    
+        "422":
+          description: Market temporarily disabled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Market 'dfw' temporarily disabled: Data quality issues"
+                  retry_after:
+                    type: string
+                    description: When to retry
+                    example: "2025-08-25T00:00:00Z"
+                    
+        "429":
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Rate limit exceeded"
+          headers:
+            X-RateLimit-Reset:
+              schema:
+                type: integer
+              description: Unix timestamp when rate limit resets
+              
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
+
+  /health:
+    get:
+      summary: Health check
+      description: Returns system health status
+      operationId: getHealth
+      tags:
+        - System
+      responses:
+        "200":
+          description: System healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                    example: "2025-08-23T10:30:00Z"
+                  version:
+                    type: string
+                    example: "1.0.0"
+
+  /accuracy:
+    get:
+      summary: Get accuracy metrics
+      description: Returns latest accuracy metrics for all markets
+      operationId: getAccuracy
+      tags:
+        - Monitoring
+      parameters:
+        - name: market
+          in: query
+          description: Filter by specific market
+          schema:
+            type: string
+            enum: [dfw, ie, atl, phx, sav]
+      responses:
+        "200":
+          description: Accuracy metrics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    market_slug:
+                      type: string
+                      example: "dfw"
+                    method:
+                      type: string  
+                      example: "weighted_median_robust_v1.0"
+                    calc_date:
+                      type: string
+                      format: date
+                      example: "2025-08-23"
+                    sample_size:
+                      type: integer
+                      example: 45
+                    mape:
+                      type: number
+                      description: Mean Absolute Percentage Error
+                      example: 0.087
+                    rmse_bps:
+                      type: number
+                      description: RMSE in basis points
+                      example: 42.3
+                    coverage80:
+                      type: number
+                      description: Coverage at 80% confidence
+                      example: 0.81
+                    ape_q80:
+                      type: number
+                      description: 80th percentile APE
+                      example: 0.052
+                    sla_status:
+                      type: string
+                      enum: [pass, fail]
+                      example: "pass"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authenticated access
+
+security:
+  - ApiKeyAuth: []
+
+tags:
+  - name: Valuation
+    description: Property valuation operations
+  - name: System
+    description: System health and status
+  - name: Monitoring  
+    description: Performance and accuracy monitoring
+
+externalDocs:
+  description: CapSight Methodology Documentation
+  url: https://docs.capsight.com/methodology/v1.0

@@ -1,0 +1,49 @@
+{
+  "folders": [
+    {
+      "name": "Root",
+      "path": "."
+    },
+    {
+      "name": "Frontend",
+      "path": "./frontend"
+    },
+    {
+      "name": "Backend", 
+      "path": "./backend"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "property-predictor/**": true,
+      "backend_v2/**": true,
+      "**/.venv": true,
+      "**/__pycache__": true,
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.git": true
+    },
+    "search.exclude": {
+      "property-predictor/**": true,
+      "backend_v2/**": true,
+      "**/.venv": true,
+      "**/__pycache__": true,
+      "**/node_modules": true,
+      "**/dist": true
+    },
+    "typescript.preferences.includePackageJsonAutoImports": "off",
+    "python.defaultInterpreterPath": "./backend/.venv/Scripts/python.exe",
+    "eslint.workingDirectories": [
+      "frontend"
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-vscode.vscode-typescript-next",
+      "bradlc.vscode-tailwindcss",
+      "esbenp.prettier-vscode",
+      "ms-vscode.vscode-eslint"
+    ]
+  }
+}

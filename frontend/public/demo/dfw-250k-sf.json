@@ -1,0 +1,69 @@
+{
+  "valuation_total_usd": 28750000,
+  "valuation_low_usd": 26500000,
+  "valuation_high_usd": 31000000,
+  "implied_cap_rate": 0.0678,
+  "market_slug": "dfw",
+  "method": "hedonic_regression",
+  "method_version": "2.1.3",
+  "confidence_level": 0.80,
+  "comp_count": 47,
+  "outliers_removed": 3,
+  "time_adjustment_months": 6,
+  "fallback_reasons": [],
+  "valuation_date": "2024-08-23",
+  "top_comps": [
+    {
+      "masked_address": "****5 Legacy Dr, Dallas",
+      "sale_date": "2024-02-15",
+      "distance_mi": 2.3,
+      "adj_cap_rate": 0.0685,
+      "weight": 0.18,
+      "price_total_usd": 32500000,
+      "building_sf": 285000
+    },
+    {
+      "masked_address": "****2 N Central Expy, Richardson",
+      "sale_date": "2024-01-22",
+      "distance_mi": 4.1,
+      "adj_cap_rate": 0.0672,
+      "weight": 0.15,
+      "price_total_usd": 27800000,
+      "building_sf": 245000
+    },
+    {
+      "masked_address": "****8 Preston Rd, Frisco",
+      "sale_date": "2023-11-18",
+      "distance_mi": 3.7,
+      "adj_cap_rate": 0.0691,
+      "weight": 0.14,
+      "price_total_usd": 29200000,
+      "building_sf": 260000
+    },
+    {
+      "masked_address": "****1 Dallas Pkwy, Addison",
+      "sale_date": "2024-03-08",
+      "distance_mi": 1.8,
+      "adj_cap_rate": 0.0663,
+      "weight": 0.12,
+      "price_total_usd": 35100000,
+      "building_sf": 315000
+    },
+    {
+      "masked_address": "****7 Galleria Dr, Dallas",
+      "sale_date": "2023-12-12",
+      "distance_mi": 5.2,
+      "adj_cap_rate": 0.0688,
+      "weight": 0.11,
+      "price_total_usd": 26900000,
+      "building_sf": 235000
+    }
+  ],
+  "calculation_details": {
+    "time_adjustment_summary": "Applied 2.3% positive adjustment for 6-month appreciation trend in DFW office market",
+    "outlier_trim_details": "Removed 3 outliers: 1 distressed sale, 2 properties >50% deviation from market median",
+    "sample_quality": "high",
+    "dispersion_coefficient": 0.12,
+    "market_conditions": "stable"
+  }
+}

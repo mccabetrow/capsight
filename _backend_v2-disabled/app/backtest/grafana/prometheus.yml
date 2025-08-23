@@ -1,0 +1,52 @@
+# Prometheus configuration for CapSight Backtest monitoring
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "backtest_rules.yml"
+
+scrape_configs:
+  - job_name: 'capsight-backtest'
+    static_configs:
+      - targets: ['localhost:8000']  # FastAPI app with Prometheus metrics
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+    scrape_timeout: 5s
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['localhost:6379']
+    metrics_path: '/metrics'
+
+  - job_name: 'postgresql'
+    static_configs:
+      - targets: ['localhost:5432']
+    metrics_path: '/metrics'
+
+  - job_name: 'mlflow'
+    static_configs:
+      - targets: ['localhost:5000']
+    metrics_path: '/metrics'
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          - localhost:9093
+
+# Custom metrics for backtesting
+# These will be exposed by the FastAPI app
+custom_metrics:
+  - backtest_runs_total: "Total number of backtest runs"
+  - backtest_runs_successful_total: "Number of successful backtest runs"
+  - backtest_runtime_seconds: "Runtime of backtest runs in seconds"
+  - backtest_model_accuracy: "Model accuracy scores from backtests"
+  - backtest_investment_return_accuracy: "Investment return prediction accuracy"
+  - backtest_predictions_total: "Total number of predictions made"
+  - backtest_sla_breaches_total: "Number of SLA breaches"
+  - backtest_feature_drift_score: "Feature drift detection scores"
+  - backtest_scheduled_jobs: "Number of scheduled backtest jobs by status"
+  - backtest_roc_auc: "ROC AUC scores by model version"
+  - backtest_uplift_percentage: "Uplift analysis percentages"

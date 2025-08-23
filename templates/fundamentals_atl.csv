@@ -1,0 +1,6 @@
+fundamentals_id,market_slug,year,quarter,unemployment_rate_pct,vacancy_rate_pct,absorption_sf,construction_deliveries_sf,net_asking_rent_psf_annual,population_growth_rate_pct,gdp_growth_rate_pct,trade_volume_teu,notes
+atl-f-2024-q3,atl,2024,3,3.1,4.2,1200000,800000,6.8,2.1,3.2,500000,Strong logistics sector
+atl-f-2024-q2,atl,2024,2,3.3,4.8,950000,600000,6.5,2.0,3.1,485000,Amazon expansion continues
+atl-f-2024-q1,atl,2024,1,3.4,5.1,850000,400000,6.2,1.9,3.0,470000,Steady industrial demand
+atl-f-2023-q4,atl,2023,4,3.5,5.5,750000,300000,6.0,1.8,2.9,455000,Year-end market cooling
+atl-f-2023-q3,atl,2023,3,3.2,5.8,900000,500000,5.8,1.9,3.1,460000,Post-COVID recovery peak

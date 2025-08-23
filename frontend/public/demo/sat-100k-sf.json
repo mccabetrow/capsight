@@ -1,0 +1,69 @@
+{
+  "valuation_total_usd": 8950000,
+  "valuation_low_usd": 8100000,
+  "valuation_high_usd": 9800000,
+  "implied_cap_rate": 0.0813,
+  "market_slug": "sat",
+  "method": "simple_cap_rate",
+  "method_version": "1.8.2",
+  "confidence_level": 0.80,
+  "comp_count": 18,
+  "outliers_removed": 1,
+  "time_adjustment_months": 8,
+  "fallback_reasons": ["low_sample", "high_dispersion"],
+  "valuation_date": "2024-08-23",
+  "top_comps": [
+    {
+      "masked_address": "****2 IH-10 W, San Antonio",
+      "sale_date": "2023-10-05",
+      "distance_mi": 2.1,
+      "adj_cap_rate": 0.0825,
+      "weight": 0.28,
+      "price_total_usd": 9850000,
+      "building_sf": 112000
+    },
+    {
+      "masked_address": "****5 Loop 1604, San Antonio", 
+      "sale_date": "2024-01-18",
+      "distance_mi": 4.6,
+      "adj_cap_rate": 0.0807,
+      "weight": 0.24,
+      "price_total_usd": 7650000,
+      "building_sf": 89000
+    },
+    {
+      "masked_address": "****8 Medical Dr, San Antonio",
+      "sale_date": "2023-11-30",
+      "distance_mi": 3.2,
+      "adj_cap_rate": 0.0798,
+      "weight": 0.21,
+      "price_total_usd": 11200000,
+      "building_sf": 125000
+    },
+    {
+      "masked_address": "****1 Wurzbach Rd, San Antonio",
+      "sale_date": "2024-02-14",
+      "distance_mi": 1.8,
+      "adj_cap_rate": 0.0819,
+      "weight": 0.18,
+      "price_total_usd": 8750000,
+      "building_sf": 95000
+    },
+    {
+      "masked_address": "****3 Broadway, San Antonio",
+      "sale_date": "2023-12-08",
+      "distance_mi": 5.1,
+      "adj_cap_rate": 0.0831,
+      "weight": 0.15,
+      "price_total_usd": 6890000,
+      "building_sf": 78000
+    }
+  ],
+  "calculation_details": {
+    "time_adjustment_summary": "Applied 3.1% positive adjustment for 8-month appreciation trend in San Antonio office market",
+    "outlier_trim_details": "Removed 1 outlier: lease-up property with temporary cap rate compression",
+    "sample_quality": "low",
+    "dispersion_coefficient": 0.31,
+    "market_conditions": "volatile"
+  }
+}

@@ -1,0 +1,69 @@
+{
+  "valuation_total_usd": 12750000,
+  "valuation_low_usd": 11800000,
+  "valuation_high_usd": 13700000,
+  "implied_cap_rate": 0.0742,
+  "market_slug": "aus",
+  "method": "hedonic_regression", 
+  "method_version": "2.1.3",
+  "confidence_level": 0.80,
+  "comp_count": 31,
+  "outliers_removed": 2,
+  "time_adjustment_months": 4,
+  "fallback_reasons": ["low_sample"],
+  "valuation_date": "2024-08-23",
+  "top_comps": [
+    {
+      "masked_address": "****3 Domain Dr, Austin",
+      "sale_date": "2024-04-02",
+      "distance_mi": 1.9,
+      "adj_cap_rate": 0.0755,
+      "weight": 0.22,
+      "price_total_usd": 14200000,
+      "building_sf": 165000
+    },
+    {
+      "masked_address": "****6 Research Blvd, Austin",
+      "sale_date": "2024-02-28",
+      "distance_mi": 3.4,
+      "adj_cap_rate": 0.0738,
+      "weight": 0.19,
+      "price_total_usd": 11900000,
+      "building_sf": 145000
+    },
+    {
+      "masked_address": "****1 Mopac Expy, Austin",
+      "sale_date": "2023-12-15",
+      "distance_mi": 2.7,
+      "adj_cap_rate": 0.0748,
+      "weight": 0.17,
+      "price_total_usd": 13500000,
+      "building_sf": 158000
+    },
+    {
+      "masked_address": "****9 Congress Ave, Austin",
+      "sale_date": "2024-01-11",
+      "distance_mi": 4.8,
+      "adj_cap_rate": 0.0729,
+      "weight": 0.15,
+      "price_total_usd": 16800000,
+      "building_sf": 195000
+    },
+    {
+      "masked_address": "****4 Lamar Blvd, Austin",
+      "sale_date": "2024-03-22",
+      "distance_mi": 3.1,
+      "adj_cap_rate": 0.0751,
+      "weight": 0.13,
+      "price_total_usd": 10750000,
+      "building_sf": 128000
+    }
+  ],
+  "calculation_details": {
+    "time_adjustment_summary": "Applied 1.8% positive adjustment for 4-month appreciation trend in Austin office market",
+    "outlier_trim_details": "Removed 2 outliers: 1 trophy property, 1 value-add opportunity",
+    "sample_quality": "medium",
+    "dispersion_coefficient": 0.18,
+    "market_conditions": "recovering"
+  }
+}

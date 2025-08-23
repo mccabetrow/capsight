@@ -1,0 +1,3 @@
+market_slug,as_of_date,vacancy_rate_pct,avg_asking_rent_psf_yr_nnn,yoy_rent_growth_pct,new_supply_sf_ytd,under_construction_sf,net_absorption_sf_ytd,cap_rate_stabilized_median_pct,source_name,source_url,source_date,notes
+ie,2024-12-01,2.8,8.95,18.3,4200000,12500000,3800000,5.8,Cushman Industrial Report,https://example.com/cushman-ie-q4-2024,2024-12-15,High demand driving rent growth
+ie,2024-09-01,3.2,7.65,15.1,2800000,13200000,2100000,6.0,JLL Inland Empire Report,https://example.com/jll-ie-q3-2024,2024-09-30,Limited availability pushing rates higher

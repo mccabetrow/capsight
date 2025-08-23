@@ -1,0 +1,93 @@
+{
+  "typescript.preferences.includePackageJsonAutoImports": "off",
+  "typescript.suggest.autoImports": false,
+  "typescript.validate.enable": true,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.next": true,
+    "property-predictor/**": true,
+    "_property-predictor-disabled/**": true,
+    "backend_v2/**": true,
+    "_backend_v2-disabled/**": true,
+    "PilotLaunchPackage/**": true,
+    "accuracy_audit/**": true,
+    "compliance/**": true,
+    "ops/**": true,
+    "models/**": true,
+    "ml/**": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "property-predictor/**": true,
+    "_property-predictor-disabled/**": true,
+    "backend_v2/**": true,
+    "_backend_v2-disabled/**": true,
+    "PilotLaunchPackage/**": true,
+    "accuracy_audit/**": true,
+    "compliance/**": true,
+    "ops/**": true,
+    "models/**": true,
+    "ml/**": true
+  },
+  "python.defaultInterpreterPath": "./backend/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "./backend"
+  ],
+  "python.analysis.exclude": [
+    "property-predictor/**",
+    "_property-predictor-disabled/**",
+    "backend_v2/**",
+    "_backend_v2-disabled/**",
+    ".venv/**",
+    "PilotLaunchPackage/**",
+    "accuracy_audit/**",
+    "compliance/**",
+    "ops/**",
+    "models/**",
+    "ml/**"
+  ],
+  "typescript.preferences.includeCompletionsWithSnippetText": false,
+  "eslint.workingDirectories": [
+    "frontend"
+  ],
+  "eslint.exclude": [
+    "property-predictor/**",
+    "_property-predictor-disabled/**",
+    "backend_v2/**",
+    "_backend_v2-disabled/**",
+    "PilotLaunchPackage/**",
+    "accuracy_audit/**",
+    "compliance/**",
+    "ops/**",
+    "models/**",
+    "ml/**"
+  ],
+  "files.watcherExclude": {
+    "**/node_modules/**": true,
+    "**/.venv/**": true,
+    "**/dist/**": true,
+    "**/build/**": true,
+    "property-predictor/**": true,
+    "_property-predictor-disabled/**": true,
+    "backend_v2/**": true,
+    "_backend_v2-disabled/**": true,
+    "PilotLaunchPackage/**": true,
+    "accuracy_audit/**": true,
+    "compliance/**": true,
+    "ops/**": true,
+    "models/**": true,
+    "ml/**": true
+  }
+}
