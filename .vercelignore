@@ -1,0 +1,14 @@
+# Exclude separate API server from Vercel build
+api/
+backend/
+backend_v2/
+_backend_v2-disabled/
+docs/
+capsight-next/
+frontend/
+.venv/
+*.pyc
+__pycache__/
+.env
+.env.local
+.env.*.local
