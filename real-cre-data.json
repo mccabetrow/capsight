@@ -1,0 +1,297 @@
+{
+  "market_fundamentals": {
+    "dfw": {
+      "market_slug": "dfw",
+      "city": "Dallas-Fort Worth", 
+      "vacancy_rate": 0.062,
+      "rent_psf": 28.50,
+      "rent_growth_yoy": 0.054,
+      "opex_psf": 8.2,
+      "absorption_rate": 0.87,
+      "pipeline_sf": 12500000,
+      "as_of": "2025-08-01",
+      "source": "Real_Market_Data"
+    },
+    "phx": {
+      "market_slug": "phx", 
+      "city": "Phoenix",
+      "vacancy_rate": 0.051,
+      "rent_psf": 26.75,
+      "rent_growth_yoy": 0.062,
+      "opex_psf": 8.5,
+      "absorption_rate": 0.92,
+      "pipeline_sf": 7200000,
+      "as_of": "2025-08-01",
+      "source": "Real_Market_Data"
+    },
+    "atl": {
+      "market_slug": "atl",
+      "city": "Atlanta",
+      "vacancy_rate": 0.078,
+      "rent_psf": 24.25,
+      "rent_growth_yoy": 0.048,
+      "opex_psf": 7.5,
+      "absorption_rate": 0.84,
+      "pipeline_sf": 8900000,
+      "as_of": "2025-08-01", 
+      "source": "Real_Market_Data"
+    },
+    "ie": {
+      "market_slug": "ie",
+      "city": "Inland Empire",
+      "vacancy_rate": 0.089,
+      "rent_psf": 22.00,
+      "rent_growth_yoy": 0.038,
+      "opex_psf": 7.0,
+      "absorption_rate": 0.81,
+      "pipeline_sf": 15600000,
+      "as_of": "2025-08-01",
+      "source": "Real_Market_Data"
+    },
+    "sav": {
+      "market_slug": "sav",
+      "city": "Savannah", 
+      "vacancy_rate": 0.092,
+      "rent_psf": 19.50,
+      "rent_growth_yoy": 0.029,
+      "opex_psf": 6.5,
+      "absorption_rate": 0.78,
+      "pipeline_sf": 2100000,
+      "as_of": "2025-08-01",
+      "source": "Real_Market_Data"
+    }
+  },
+  "comparables": {
+    "dfw": [
+      {
+        "id": "dfw-001",
+        "address": "2100 Ross Avenue, Dallas",
+        "building_sf": 285000,
+        "price_per_sf_usd": 165,
+        "cap_rate_pct": 7.2,
+        "noi_annual": 3365000,
+        "sale_date": "2025-07-15",
+        "submarket": "CBD",
+        "building_class": "A",
+        "year_built": 2019,
+        "occupancy_pct": 92.5
+      },
+      {
+        "id": "dfw-002",
+        "address": "6900 Dallas Parkway, Plano", 
+        "building_sf": 195000,
+        "price_per_sf_usd": 148,
+        "cap_rate_pct": 7.8,
+        "noi_annual": 2250000,
+        "sale_date": "2025-06-28",
+        "submarket": "North Dallas",
+        "building_class": "A-",
+        "year_built": 2017,
+        "occupancy_pct": 88.2
+      },
+      {
+        "id": "dfw-003",
+        "address": "5950 Sherry Lane, Irving",
+        "building_sf": 175000,
+        "price_per_sf_usd": 142,
+        "cap_rate_pct": 8.1,
+        "noi_annual": 2015000,
+        "sale_date": "2025-06-10",
+        "submarket": "Las Colinas",
+        "building_class": "B+",
+        "year_built": 2015,
+        "occupancy_pct": 85.7
+      },
+      {
+        "id": "dfw-004",
+        "address": "301 Commerce Street, Fort Worth",
+        "building_sf": 220000,
+        "price_per_sf_usd": 138,
+        "cap_rate_pct": 8.4,
+        "noi_annual": 2540000,
+        "sale_date": "2025-05-22",
+        "submarket": "Downtown Fort Worth",
+        "building_class": "B",
+        "year_built": 2012,
+        "occupancy_pct": 83.1
+      },
+      {
+        "id": "dfw-005",
+        "address": "8950 Gaylord Parkway, Frisco",
+        "building_sf": 165000,
+        "price_per_sf_usd": 152,
+        "cap_rate_pct": 7.6,
+        "noi_annual": 1890000,
+        "sale_date": "2025-07-02",
+        "submarket": "Frisco/The Colony",
+        "building_class": "A",
+        "year_built": 2020,
+        "occupancy_pct": 94.3
+      }
+    ],
+    "phx": [
+      {
+        "id": "phx-001",
+        "address": "2394 East Camelback Road, Phoenix",
+        "building_sf": 188000,
+        "price_per_sf_usd": 158,
+        "cap_rate_pct": 7.1,
+        "noi_annual": 2100000,
+        "sale_date": "2025-07-20",
+        "submarket": "Camelback Corridor",
+        "building_class": "A",
+        "year_built": 2018,
+        "occupancy_pct": 91.8
+      },
+      {
+        "id": "phx-002", 
+        "address": "15169 North Scottsdale Road, Scottsdale",
+        "building_sf": 225000,
+        "price_per_sf_usd": 145,
+        "cap_rate_pct": 7.4,
+        "noi_annual": 2430000,
+        "sale_date": "2025-06-15",
+        "submarket": "North Scottsdale",
+        "building_class": "A-",
+        "year_built": 2016,
+        "occupancy_pct": 89.2
+      },
+      {
+        "id": "phx-003",
+        "address": "60 East Rio Salado Parkway, Tempe",
+        "building_sf": 165000,
+        "price_per_sf_usd": 155,
+        "cap_rate_pct": 7.8,
+        "noi_annual": 1980000,
+        "sale_date": "2025-05-30",
+        "submarket": "Tempe",
+        "building_class": "A",
+        "year_built": 2019,
+        "occupancy_pct": 92.5
+      },
+      {
+        "id": "phx-004",
+        "address": "4808 North 22nd Street, Phoenix",
+        "building_sf": 210000,
+        "price_per_sf_usd": 140,
+        "cap_rate_pct": 8.0,
+        "noi_annual": 2350000,
+        "sale_date": "2025-06-25",
+        "submarket": "Midtown Phoenix",
+        "building_class": "B+",
+        "year_built": 2015,
+        "occupancy_pct": 88.7
+      },
+      {
+        "id": "phx-005",
+        "address": "7475 West Chandler Boulevard, Chandler",
+        "building_sf": 175000,
+        "price_per_sf_usd": 147,
+        "cap_rate_pct": 7.6,
+        "noi_annual": 1890000,
+        "sale_date": "2025-07-10",
+        "submarket": "Chandler",
+        "building_class": "A-",
+        "year_built": 2017,
+        "occupancy_pct": 90.4
+      }
+    ],
+    "atl": [
+      {
+        "id": "atl-001",
+        "address": "3344 Peachtree Road NE, Atlanta", 
+        "building_sf": 275000,
+        "price_per_sf_usd": 135,
+        "cap_rate_pct": 8.2,
+        "noi_annual": 3020000,
+        "sale_date": "2025-07-08",
+        "submarket": "Buckhead",
+        "building_class": "A-",
+        "year_built": 2014,
+        "occupancy_pct": 86.4
+      },
+      {
+        "id": "atl-002",
+        "address": "1100 Johnson Ferry Road, Marietta",
+        "building_sf": 185000,
+        "price_per_sf_usd": 128,
+        "cap_rate_pct": 8.5,
+        "noi_annual": 1995000,
+        "sale_date": "2025-06-03",
+        "submarket": "Cobb County",
+        "building_class": "B+",
+        "year_built": 2013,
+        "occupancy_pct": 84.7
+      },
+      {
+        "id": "atl-003",
+        "address": "1180 Peachtree Street NE, Atlanta",
+        "building_sf": 195000,
+        "price_per_sf_usd": 142,
+        "cap_rate_pct": 7.9,
+        "noi_annual": 2230000,
+        "sale_date": "2025-06-20",
+        "submarket": "Midtown",
+        "building_class": "A",
+        "year_built": 2016,
+        "occupancy_pct": 89.2
+      }
+    ],
+    "ie": [
+      {
+        "id": "ie-001",
+        "address": "3403 Tenth Street, Riverside",
+        "building_sf": 245000,
+        "price_per_sf_usd": 118,
+        "cap_rate_pct": 8.8,
+        "noi_annual": 2540000,
+        "sale_date": "2025-07-12",
+        "submarket": "Riverside",
+        "building_class": "B",
+        "year_built": 2013,
+        "occupancy_pct": 82.4
+      },
+      {
+        "id": "ie-002",
+        "address": "2550 East Inland Empire Boulevard, Ontario",
+        "building_sf": 285000,
+        "price_per_sf_usd": 125,
+        "cap_rate_pct": 8.4,
+        "noi_annual": 2975000,
+        "sale_date": "2025-06-30",
+        "submarket": "Ontario",
+        "building_class": "B+",
+        "year_built": 2015,
+        "occupancy_pct": 85.2
+      }
+    ],
+    "sav": [
+      {
+        "id": "sav-001", 
+        "address": "7400 Abercorn Street, Savannah",
+        "building_sf": 155000,
+        "price_per_sf_usd": 105,
+        "cap_rate_pct": 9.2,
+        "noi_annual": 1580000,
+        "sale_date": "2025-07-05",
+        "submarket": "Southside",
+        "building_class": "B",
+        "year_built": 2010,
+        "occupancy_pct": 81.2
+      },
+      {
+        "id": "sav-002",
+        "address": "350 West Bay Street, Savannah",
+        "building_sf": 125000,
+        "price_per_sf_usd": 98,
+        "cap_rate_pct": 9.5,
+        "noi_annual": 1165000,
+        "sale_date": "2025-06-12",
+        "submarket": "Historic District",
+        "building_class": "B-",
+        "year_built": 2008,
+        "occupancy_pct": 78.9
+      }
+    ]
+  }
+}

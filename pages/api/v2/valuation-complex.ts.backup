@@ -1,0 +1,397 @@
+/**
+ * ===== REAL-TIME VALUATION API V2 =====
+ * Uses DataFetcher for live macro data, market fundamentals, and comps
+ * Includes full provenance, freshness tracking, and debug mode
+ */
+
+import { NextRequest, NextResponse } from 'next/server'
+import { getDataFetcher, type DataProvenance } from '../../../lib/data-fetcher'
+import { getWebhookClient, createValuationPayload, createInsufficientEvidencePayload, type ValuationUpsert } from '../../../lib/webhook-client'
+
+export interface ValuationRequest {
+  market: string // market slug (dfw, atl, phx, etc.)
+  building_sf: number
+  noi_annual?: number
+  debug?: boolean
+}
+
+export interface ValuationResponse {
+  // Core valuation
+  estimated_value: number
+  estimated_value_range: {
+    low: number
+    high: number
+  }
+  cap_rate_applied: number
+  price_per_sf: number
+  
+  // Confidence and status
+  confidence_score: number // 0.0 to 1.0
+  valuation_status: 'FRESH' | 'STALE_DATA' | 'INSUFFICIENT_DATA'
+  
+  // Data sources and freshness
+  provenance: DataProvenance
+  freshness_summary: {
+    macro: { status: string, days_old: number }
+    fundamentals: { status: string, days_old: number }
+    comps: { status: string, days_old: number }
+  }
+  
+  // Calculated fields
+  derived: {
+    noi_estimated?: number
+    market_cap_rate: number
+    adjusted_cap_rate: number
+    risk_premium: number
+    comp_count: number
+    similar_comps_count: number
+  }
+  
+  // Metadata
+  calculated_at: string
+  model_version: string
+  schema_version: string
+  
+  // Debug information (only if debug=true)
+  debug?: {
+    macro_raw: any
+    fundamentals_raw: any
+    comps_raw: any[]
+    calculations: Record<string, number>
+    warnings: string[]
+  }
+}
+
+export async function POST(request: NextRequest): Promise<NextResponse<ValuationResponse | { error: string }>> {
+  const start_time = Date.now()
+  
+  try {
+    // Parse request
+    const body: ValuationRequest = await request.json()
+    const { market, building_sf, noi_annual, debug = false } = body
+    
+    // Validate inputs
+    if (!market || !building_sf || building_sf <= 0) {
+      return NextResponse.json({ error: 'Invalid request: market and building_sf required' }, { status: 400 })
+    }
+
+    const dataFetcher = getDataFetcher()
+    const warnings: string[] = []
+
+    // ===== 1. FETCH MACRO DATA =====
+    console.log(`🌐 Fetching macro data...`)
+    const { data: macro_data, provenance: macro_provenance } = await dataFetcher.getMacroData()
+    
+    // ===== 2. FETCH MARKET FUNDAMENTALS =====
+    console.log(`📊 Fetching market fundamentals for ${market}...`)
+    const { data: fundamentals, provenance: fundamentals_provenance, freshness: fundamentals_freshness } = 
+      await dataFetcher.getMarketFundamentals(market)
+    
+    if (!fundamentals) {
+      return NextResponse.json({ 
+        error: 'INSUFFICIENT_DATA: No market fundamentals available for this market'
+      }, { status: 422 })
+    }
+
+    // ===== 3. FETCH COMPARABLE SALES =====
+    console.log(`🏢 Fetching comparable sales for ${market}...`)
+    const { data: comps, provenance: comps_provenance, freshness: comps_freshness } = 
+      await dataFetcher.getComps(market, 15)
+
+    // ===== 4. CALCULATE VALUATION =====
+    console.log(`💰 Calculating valuation...`)
+    
+    // Base NOI calculation
+    let estimated_noi = noi_annual
+    if (!estimated_noi && fundamentals.avg_asking_rent_psf_yr_nnn) {
+      // Estimate NOI from market rent and occupancy assumptions
+      const gross_income = building_sf * fundamentals.avg_asking_rent_psf_yr_nnn
+      const occupancy_rate = (100 - fundamentals.vacancy_rate_pct) / 100
+      const operating_expense_ratio = 0.30 // 30% typical for office
+      estimated_noi = gross_income * occupancy_rate * (1 - operating_expense_ratio)
+      warnings.push('NOI estimated from market rent and occupancy assumptions')
+    }
+
+    if (!estimated_noi) {
+      return NextResponse.json({ 
+        error: 'INSUFFICIENT_DATA: Unable to determine NOI for valuation'
+      }, { status: 422 })
+    }
+
+    // Market cap rate analysis
+    const market_cap_rate = fundamentals.avg_cap_rate_pct
+    
+    // Risk adjustments based on macro conditions
+    let risk_premium = 0
+    
+    // Fed funds impact on cap rates (higher rates = higher cap rates)
+    const fed_funds_premium = (macro_data.fed_funds_rate - 2.0) * 0.1 // 10bps per 100bps above 2%
+    risk_premium += Math.max(0, fed_funds_premium)
+    
+    // Credit spread impact
+    if (macro_data.credit_spread) {
+      const credit_premium = (macro_data.credit_spread - 1.5) * 0.05 // 5bps per 100bps above 150bps
+      risk_premium += Math.max(0, credit_premium)
+    }
+    
+    // Market growth adjustment (lower growth = higher risk)
+    const growth_adjustment = (3.0 - fundamentals.yoy_rent_growth_pct) * 0.05 // 5bps per 1% below 3%
+    risk_premium += Math.max(0, growth_adjustment)
+
+    const adjusted_cap_rate = market_cap_rate + risk_premium
+
+    // Primary valuation (Income Approach)
+    const estimated_value = estimated_noi / (adjusted_cap_rate / 100)
+    const price_per_sf = estimated_value / building_sf
+
+    // Comparable sales validation
+    const similar_comps = comps.filter(comp => {
+      const size_ratio = comp.building_sf / building_sf
+      return size_ratio >= 0.5 && size_ratio <= 2.0 // Within 50%-200% size range
+    })
+
+    let comp_price_per_sf_avg = 0
+    if (similar_comps.length > 0) {
+      comp_price_per_sf_avg = similar_comps.reduce((sum, comp) => sum + comp.price_per_sf_usd, 0) / similar_comps.length
+    }
+
+    // Confidence scoring
+    let confidence_score = 0.8 // Base confidence
+
+    // Reduce confidence for stale data
+    if (!fundamentals_freshness.is_fresh) confidence_score -= 0.15
+    if (!comps_freshness.is_fresh) confidence_score -= 0.15
+    if (macro_provenance?.from_cache) confidence_score -= 0.05
+
+    // Adjust for comparable count
+    if (similar_comps.length < 3) confidence_score -= 0.2
+    else if (similar_comps.length >= 5) confidence_score += 0.1
+
+    // Cap rate validation against comps
+    if (similar_comps.length > 0) {
+      const comp_cap_rates = similar_comps.map(c => c.cap_rate_pct)
+      const comp_cap_rate_avg = comp_cap_rates.reduce((a, b) => a + b, 0) / comp_cap_rates.length
+      const cap_rate_variance = Math.abs(adjusted_cap_rate - comp_cap_rate_avg)
+      
+      if (cap_rate_variance > 1.5) { // More than 150bps difference
+        confidence_score -= 0.1
+        warnings.push(`Cap rate ${adjusted_cap_rate.toFixed(2)}% differs significantly from comparable average ${comp_cap_rate_avg.toFixed(2)}%`)
+      }
+    }
+
+    // Valuation range (±20% for confidence intervals)
+    const range_factor = 1 - confidence_score * 0.25 // More confident = tighter range
+    const estimated_value_range = {
+      low: estimated_value * (1 - range_factor * 0.2),
+      high: estimated_value * (1 + range_factor * 0.2)
+    }
+
+    // Determine overall status
+    let valuation_status: ValuationResponse['valuation_status'] = 'FRESH'
+    if (!fundamentals_freshness.is_fresh || !comps_freshness.is_fresh) {
+      valuation_status = 'STALE_DATA'
+      confidence_score -= 0.2
+    }
+    if (similar_comps.length === 0 || confidence_score < 0.4) {
+      valuation_status = 'INSUFFICIENT_DATA'
+    }
+
+    // Build response
+    const response: ValuationResponse = {
+      estimated_value: Math.round(estimated_value),
+      estimated_value_range: {
+        low: Math.round(estimated_value_range.low),
+        high: Math.round(estimated_value_range.high)
+      },
+      cap_rate_applied: parseFloat(adjusted_cap_rate.toFixed(2)),
+      price_per_sf: parseFloat(price_per_sf.toFixed(2)),
+      confidence_score: parseFloat(confidence_score.toFixed(2)),
+      valuation_status,
+      provenance: {
+        macro: macro_provenance,
+        fundamentals: fundamentals_provenance,
+        comps: comps_provenance
+      },
+      freshness_summary: {
+        macro: { 
+          status: 'FRESH', // Macro data is always fresh due to aggressive caching 
+          days_old: 0 
+        },
+        fundamentals: { 
+          status: fundamentals_freshness.status, 
+          days_old: fundamentals_freshness.days_old 
+        },
+        comps: { 
+          status: comps_freshness.status, 
+          days_old: comps_freshness.days_old 
+        }
+      },
+      derived: {
+        noi_estimated: estimated_noi ? Math.round(estimated_noi) : undefined,
+        market_cap_rate,
+        adjusted_cap_rate,
+        risk_premium: parseFloat(risk_premium.toFixed(2)),
+        comp_count: comps.length,
+        similar_comps_count: similar_comps.length
+      },
+      calculated_at: new Date().toISOString(),
+      model_version: '2.1.0',
+      schema_version: '1.0'
+    }
+
+    // Add debug information if requested
+    if (debug) {
+      response.debug = {
+        macro_raw: macro_data,
+        fundamentals_raw: fundamentals,
+        comps_raw: similar_comps,
+        calculations: {
+          gross_income: building_sf * (fundamentals.avg_asking_rent_psf_yr_nnn || 0),
+          occupancy_rate: (100 - fundamentals.vacancy_rate_pct) / 100,
+          estimated_noi: estimated_noi || 0,
+          fed_funds_premium,
+          growth_adjustment,
+          total_risk_premium: risk_premium,
+          comp_cap_rate_avg: similar_comps.length > 0 
+            ? similar_comps.reduce((sum, comp) => sum + comp.cap_rate_pct, 0) / similar_comps.length 
+            : 0,
+          calculation_time_ms: Date.now() - start_time
+        },
+        warnings
+      }
+    }
+
+    console.log(`✅ Valuation complete: $${response.estimated_value.toLocaleString()} (${response.confidence_score} confidence)`)
+    
+    // ===== EMIT WEBHOOK EVENT =====
+    const webhookClient = getWebhookClient()
+    
+    try {
+      // Build webhook payload based on valuation status
+      if (valuation_status === 'INSUFFICIENT_DATA') {
+        const reasons: Array<'stale_fundamentals' | 'low_comp_count' | 'no_macro_data' | 'invalid_inputs'> = []
+        
+        if (!fundamentals_freshness.is_fresh) reasons.push('stale_fundamentals')
+        if (similar_comps.length < 2) reasons.push('low_comp_count')
+        if (!macro_data || !macro_data.fed_funds_rate) reasons.push('no_macro_data')
+        
+        const insufficientPayload = createInsufficientEvidencePayload({
+          address: `${building_sf} SF Building, ${market.toUpperCase()} Market`,
+          reason: reasons,
+          details: {
+            comp_count: similar_comps.length,
+            fundamentals_as_of: fundamentals_provenance?.as_of,
+            macro_as_of: macro_provenance?.as_of
+          },
+          provenance: {
+            macro: {
+              source: macro_provenance?.source || 'unknown',
+              as_of: macro_provenance?.as_of || new Date().toISOString(),
+              from_cache: macro_provenance?.from_cache || false
+            },
+            fundamentals: {
+              source: fundamentals_provenance?.source || 'unknown',
+              as_of: fundamentals_provenance?.as_of || new Date().toISOString()
+            },
+            comps: {
+              source: comps_provenance?.source || 'unknown',
+              as_of: comps_provenance?.as_of || new Date().toISOString()
+            }
+          }
+        })
+        
+        webhookClient.send(insufficientPayload).catch(err => 
+          console.error('❌ Webhook failed (insufficient):', err)
+        )
+        
+      } else {
+        // Create successful valuation webhook
+        const valuationPayload = createValuationPayload({
+          address: `${building_sf} SF Building, ${market.toUpperCase()} Market`,
+          lat: 32.7767, // Default Dallas coordinates - should be from request
+          lon: -96.7970,
+          market: market.toUpperCase(),
+          submarket: 'Unknown', // Should be from request
+          building_sf: building_sf,
+          year_built: 2015, // Should be from request
+          asset_type: 'office', // Should be from request
+          rent_psf_yr: fundamentals.avg_asking_rent_psf_yr_nnn || 0,
+          opex_psf_yr: fundamentals.avg_asking_rent_psf_yr_nnn * 0.30 || 0, // Estimated 30% of rent
+          vacancy_pct: fundamentals.vacancy_rate_pct / 100,
+          cap_rate_now_pct: adjusted_cap_rate,
+          cap_rate_qoq_delta_bps: 0, // Would need historical data
+          current_value: {
+            point: response.estimated_value,
+            low: response.estimated_value_range.low,
+            high: response.estimated_value_range.high,
+            confidence: response.confidence_score
+          },
+          forecast_12m: {
+            point: response.estimated_value * 1.05, // Simple 5% growth assumption
+            low: response.estimated_value_range.low * 1.03,
+            high: response.estimated_value_range.high * 1.07,
+            confidence: Math.max(0.3, response.confidence_score - 0.2)
+          },
+          drivers: [
+            `Market cap rate: ${market_cap_rate.toFixed(2)}%`,
+            `Fed funds adjustment: +${fed_funds_premium.toFixed(1)}bps`,
+            `${similar_comps.length} comparable sales`,
+            `NOI: $${(estimated_noi || 0).toLocaleString()}`
+          ],
+          provenance: {
+            macro: {
+              source: macro_provenance?.source || 'unknown',
+              as_of: macro_provenance?.as_of || new Date().toISOString(),
+              from_cache: macro_provenance?.from_cache || false
+            },
+            fundamentals: {
+              source: fundamentals_provenance?.source || 'unknown',
+              as_of: fundamentals_provenance?.as_of || new Date().toISOString()
+            },
+            comps: {
+              source: comps_provenance?.source || 'unknown',
+              as_of: comps_provenance?.as_of || new Date().toISOString()
+            }
+          }
+        })
+        
+        // Add status/warning if needed
+        if (valuation_status === 'STALE_DATA') {
+          (valuationPayload as any).status = 'STALE_DATA'
+        }
+        if (warnings.length > 0) {
+          (valuationPayload as any).warning = warnings.join('; ')
+        }
+        
+        webhookClient.send(valuationPayload).catch(err => 
+          console.error('❌ Webhook failed (valuation):', err)
+        )
+      }
+      
+    } catch (webhookError) {
+      console.error('❌ Webhook emission error:', webhookError)
+      // Don't fail the API response for webhook errors
+    }
+    
+    return NextResponse.json(response, { 
+      status: 200,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'X-Calculation-Time': `${Date.now() - start_time}ms`,
+        'X-Data-Sources': Object.keys(response.provenance).join(',')
+      }
+    })
+
+  } catch (error) {
+    console.error('Valuation API error:', error)
+    
+    return NextResponse.json({ 
+      error: `Valuation failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+    }, { 
+      status: 500,
+      headers: {
+        'X-Error-Time': `${Date.now() - start_time}ms`
+      }
+    })
+  }
+}

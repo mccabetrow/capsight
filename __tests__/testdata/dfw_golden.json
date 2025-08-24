@@ -1,0 +1,179 @@
+{
+  "test_name": "DFW Golden Test - Consistent Valuation",
+  "description": "Known inputs for Dallas-Fort Worth market should produce expected valuation within ±3% tolerance",
+  "market": "dfw",
+  "test_date": "2025-08-23",
+  "inputs": {
+    "building_sf": 200000,
+    "noi_annual": 1800000,
+    "market_fundamentals": {
+      "market_slug": "dfw",
+      "city": "Dallas-Fort Worth",
+      "vacancy_rate_pct": 6.2,
+      "avg_asking_rent_psf_yr_nnn": 28.50,
+      "yoy_rent_growth_pct": 5.4,
+      "under_construction_sf": 12500000,
+      "absorption_sf_ytd": 8200000,
+      "inventory_sf": 485000000,
+      "avg_cap_rate_pct": 7.8,
+      "as_of_date": "2025-08-01"
+    },
+    "macro_data": {
+      "fed_funds_rate": 5.25,
+      "treasury_10yr": 4.45,
+      "as_of": "2025-08-22",
+      "source": "FRED"
+    },
+    "comparables": [
+      {
+        "id": "dfw-001",
+        "market_slug": "dfw",
+        "address": "2100 Ross Avenue",
+        "building_sf": 285000,
+        "price_per_sf_usd": 165,
+        "cap_rate_pct": 7.2,
+        "noi_annual": 3365000,
+        "sale_date": "2025-07-15",
+        "submarket": "CBD",
+        "building_class": "A",
+        "year_built": 2019,
+        "occupancy_pct": 92.5
+      },
+      {
+        "id": "dfw-002", 
+        "market_slug": "dfw",
+        "address": "6900 Dallas Parkway",
+        "building_sf": 195000,
+        "price_per_sf_usd": 148,
+        "cap_rate_pct": 7.8,
+        "noi_annual": 2250000,
+        "sale_date": "2025-06-28",
+        "submarket": "North Dallas",
+        "building_class": "A-",
+        "year_built": 2017,
+        "occupancy_pct": 88.2
+      },
+      {
+        "id": "dfw-003",
+        "market_slug": "dfw", 
+        "address": "5950 Sherry Lane",
+        "building_sf": 175000,
+        "price_per_sf_usd": 142,
+        "cap_rate_pct": 8.1,
+        "noi_annual": 2015000,
+        "sale_date": "2025-06-10",
+        "submarket": "Las Colinas",
+        "building_class": "B+",
+        "year_built": 2015,
+        "occupancy_pct": 85.7
+      }
+    ]
+  },
+  "expected_results": {
+    "estimated_value": {
+      "target": 22307692,
+      "tolerance_pct": 3.0,
+      "min_acceptable": 21638462,
+      "max_acceptable": 22976923
+    },
+    "cap_rate_applied": {
+      "target": 8.07,
+      "tolerance_pct": 5.0,
+      "min_acceptable": 7.67,
+      "max_acceptable": 8.47
+    },
+    "price_per_sf": {
+      "target": 111.54,
+      "tolerance_pct": 3.0,
+      "min_acceptable": 108.19,
+      "max_acceptable": 114.88
+    },
+    "confidence_score": {
+      "min_acceptable": 0.65,
+      "expected_range": [0.75, 0.85]
+    },
+    "derived": {
+      "market_cap_rate": 7.8,
+      "risk_premium": {
+        "expected_range": [0.25, 0.35],
+        "components": {
+          "fed_funds_premium": 0.325,
+          "growth_adjustment": 0.0
+        }
+      },
+      "similar_comps_count": {
+        "min_acceptable": 1,
+        "expected": 3
+      }
+    },
+    "valuation_status": "FRESH",
+    "provenance_requirements": {
+      "macro": {
+        "source": "FRED",
+        "from_cache": false
+      },
+      "fundamentals": {
+        "source": "Supabase:market_fundamentals",
+        "record_count": 1
+      },
+      "comps": {
+        "source": "Supabase:v_comps_trimmed",
+        "record_count": {
+          "min_acceptable": 3
+        }
+      }
+    }
+  },
+  "calculation_steps": {
+    "description": "Expected calculation flow for audit trail",
+    "steps": [
+      {
+        "step": 1,
+        "description": "Calculate risk premium from macro conditions",
+        "calculation": "fed_funds_premium = (5.25 - 2.0) * 0.1 = 0.325",
+        "result": 0.325
+      },
+      {
+        "step": 2,
+        "description": "Calculate growth adjustment",
+        "calculation": "growth_adjustment = max(0, (3.0 - 5.4) * 0.05) = 0",
+        "result": 0.0
+      },
+      {
+        "step": 3,
+        "description": "Calculate adjusted cap rate",
+        "calculation": "adjusted_cap_rate = 7.8 + 0.325 + 0.0 = 8.125",
+        "result": 8.125
+      },
+      {
+        "step": 4,
+        "description": "Calculate valuation",
+        "calculation": "estimated_value = 1,800,000 / (8.125 / 100) = 22,153,846",
+        "result": 22153846
+      },
+      {
+        "step": 5,
+        "description": "Calculate price per SF",
+        "calculation": "price_per_sf = 22,153,846 / 200,000 = 110.77",
+        "result": 110.77
+      }
+    ]
+  },
+  "validation_rules": {
+    "numeric_precision": "Round monetary values to nearest dollar, percentages to 2 decimal places",
+    "confidence_factors": {
+      "base_confidence": 0.8,
+      "comp_count_adjustment": "+0.1 for ≥5 comps, -0.2 for <3 comps",
+      "freshness_penalty": "-0.15 for stale fundamentals, -0.15 for stale comps"
+    },
+    "error_conditions": {
+      "insufficient_data": "Return 422 if no fundamentals or NOI cannot be determined",
+      "stale_data": "Mark as STALE_DATA if fundamentals >90 days or comps >180 days old"
+    }
+  },
+  "performance_requirements": {
+    "max_response_time_ms": 2000,
+    "max_external_api_calls": 3,
+    "cache_hit_ratio_target": 0.8
+  }
+}
